@@ -1,16 +1,4 @@
 #!/usr/bin/env python3
-"""
-Telegram-–±–æ—Ç: —É—á—ë—Ç –≤–∏–¥–µ–æ –∏ –∫—Ä—É–∂–æ—á–∫–æ–≤ ‚Üí Google –¢–∞–±–ª–∏—Ü–∞.
-
-–ü–µ—Ä–µ–º–µ–Ω–Ω—ã–µ –æ–∫—Ä—É–∂–µ–Ω–∏—è (–æ–±—è–∑–∞—Ç–µ–ª—å–Ω—ã–µ):
-  BOT_TOKEN               ‚Äî —Ç–æ–∫–µ–Ω –æ—Ç @BotFather
-  SPREADSHEET_ID          ‚Äî ID Google-—Ç–∞–±–ª–∏—Ü—ã (–∏–∑ URL)
-  GOOGLE_CREDENTIALS_JSON ‚Äî —Å–æ–¥–µ—Ä–∂–∏–º–æ–µ credentials.json —Å–µ—Ä–≤–∏—Å-–∞–∫–∫–∞—É–Ω—Ç–∞ (–æ–¥–Ω–æ–π —Å—Ç—Ä–æ–∫–æ–π)
-
-–û–ø—Ü–∏–æ–Ω–∞–ª—å–Ω—ã–µ:
-  PORT ‚Äî –ø–æ—Ä—Ç health-check —Å–µ—Ä–≤–µ—Ä–∞ (–ø–æ —É–º–æ–ª—á–∞–Ω–∏—é 10000)
-"""
-
 import json
 import logging
 import os
@@ -28,161 +16,180 @@ from telegram.ext import (
     filters,
 )
 
-# ‚îÄ‚îÄ‚îÄ –õ–æ–≥–∏—Ä–æ–≤–∞–Ω–∏–µ ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     level=logging.INFO,
 )
 log = logging.getLogger(__name__)
 
-# ‚îÄ‚îÄ‚îÄ –ü–µ—Ä–µ–º–µ–Ω–Ω—ã–µ –æ–∫—Ä—É–∂–µ–Ω–∏—è ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 BOT_TOKEN               = os.environ["BOT_TOKEN"]
 SPREADSHEET_ID          = os.environ["SPREADSHEET_ID"]
 GOOGLE_CREDENTIALS_JSON = os.environ["GOOGLE_CREDENTIALS_JSON"]
 PORT                    = int(os.environ.get("PORT", 10000))
 
-# ‚îÄ‚îÄ‚îÄ –ö–æ–Ω—Å—Ç–∞–Ω—Ç—ã Google Sheets ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
-SHEET_TITLE = "–í–∏–¥–µ–æ-–ª–æ–≥"
-HEADER = [
-    "–î–∞—Ç–∞", "–í—Ä–µ–º—è", "User ID", "Username",
-    "–ò–º—è", "–§–∞–º–∏–ª–∏—è", "–¢–∏–ø", "–ß–∞—Ç ID", "–ß–∞—Ç",
-]
+# Russian string constants (unicode-escaped for ASCII-safe source)
+_VIDEO   = "\u0412\u0438\u0434\u0435\u043e"
+_KRUZH   = "\u041a\u0440\u0443\u0436\u043e\u0447\u0435\u043a"
+_DATE    = "\u0414\u0430\u0442\u0430"
+_TIME    = "\u0412\u0440\u0435\u043c\u044f"
+_NAME    = "\u0418\u043c\u044f"
+_SURNAME = "\u0424\u0430\u043c\u0438\u043b\u0438\u044f"
+_TYPE    = "\u0422\u0438\u043f"
+_CHATID  = "\u0427\u0430\u0442 ID"
+_CHAT    = "\u0427\u0430\u0442"
+_DASH    = "\u2014"
 
-# ‚îÄ‚îÄ‚îÄ –†–∞–±–æ—Ç–∞ —Å Google Sheets ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
+SHEET_TITLE = "\u0412\u0438\u0434\u0435\u043e-\u043b\u043e\u0433"
+HEADER = [_DATE, _TIME, "User ID", "Username", _NAME, _SURNAME, _TYPE, _CHATID, _CHAT]
 
-def _gc() -> gspread.Client:
+
+def _gc():
     return gspread.service_account_from_dict(
         json.loads(GOOGLE_CREDENTIALS_JSON),
         scopes=["https://www.googleapis.com/auth/spreadsheets"],
     )
 
 
-def _sheet() -> gspread.Worksheet:
+def _sheet():
     spreadsheet = _gc().open_by_key(SPREADSHEET_ID)
     try:
         ws = spreadsheet.worksheet(SHEET_TITLE)
     except gspread.exceptions.WorksheetNotFound:
         ws = spreadsheet.add_worksheet(SHEET_TITLE, rows=10_000, cols=len(HEADER))
         ws.append_row(HEADER)
-        # –ñ–∏—Ä–Ω—ã–π –∑–∞–≥–æ–ª–æ–≤–æ–∫
         last_col = chr(64 + len(HEADER))
-        ws.format(f"A1:{last_col}1", {"textFormat": {"bold": True}})
+        ws.format("A1:" + last_col + "1", {"textFormat": {"bold": True}})
     return ws
 
 
-def write_row(message, media_type: str) -> None:
+def write_row(message, media_type):
     user = message.from_user
     now  = datetime.now()
     row  = [
         now.strftime("%d.%m.%Y"),
         now.strftime("%H:%M:%S"),
         user.id,
-        f"@{user.username}" if user.username else "‚Äî",
-        user.first_name or "‚Äî",
-        user.last_name  or "‚Äî",
+        "@" + user.username if user.username else _DASH,
+        user.first_name or _DASH,
+        user.last_name  or _DASH,
         media_type,
         message.chat_id,
-        message.chat.title or message.chat.first_name or "‚Äî",
+        message.chat.title or message.chat.first_name or _DASH,
     ]
     _sheet().append_row(row, value_input_option="USER_ENTERED")
 
 
-# ‚îÄ‚îÄ‚îÄ –û–±—Ä–∞–±–æ—Ç—á–∏–∫–∏ –±–æ—Ç–∞ ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
-
-async def on_video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def on_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     if not msg:
         return
     if msg.video:
-        media_type = "–í–∏–¥–µ–æ"
+        media_type = _VIDEO
     elif msg.video_note:
-        media_type = "–ö—Ä—É–∂–æ—á–µ–∫"
+        media_type = _KRUZH
     else:
         return
     try:
         write_row(msg, media_type)
-        log.info("–ó–∞–ø–∏—Å–∞–Ω–æ: %s ‚Äî user_id=%s chat_id=%s", media_type, msg.from_user.id, msg.chat_id)
+        log.info("Logged %s from user_id=%s chat_id=%s", media_type, msg.from_user.id, msg.chat_id)
     except Exception:
-        log.exception("–û—à–∏–±–∫–∞ –∑–∞–ø–∏—Å–∏ –≤ —Ç–∞–±–ª–∏—Ü—É")
+        log.exception("Error writing to Google Sheets")
 
 
-async def on_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def on_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         records = _sheet().get_all_records()
     except Exception:
-        log.exception("–û—à–∏–±–∫–∞ —á—Ç–µ–Ω–∏—è —Ç–∞–±–ª–∏—Ü—ã")
-        await update.message.reply_text("‚ùå –ù–µ —É–¥–∞–ª–æ—Å—å –ø–æ–ª—É—á–∏—Ç—å –¥–∞–Ω–Ω—ã–µ –∏–∑ —Ç–∞–±–ª–∏—Ü—ã.")
+        log.exception("Error reading Google Sheets")
+        await update.message.reply_text(
+            "\u274c \u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c "
+            "\u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u0434\u0430\u043d\u043d\u044b\u0435."
+        )
         return
 
     if not records:
-        await update.message.reply_text("–ü–æ–∫–∞ –Ω–µ—Ç –∑–∞–ø–∏—Å–µ–π.")
+        await update.message.reply_text(
+            "\u041f\u043e\u043a\u0430 \u043d\u0435\u0442 \u0437\u0430\u043f\u0438\u0441\u0435\u0439."
+        )
         return
 
-    # –ê–≥—Ä–µ–≥–∞—Ü–∏—è –ø–æ –ø–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª—è–º
-    stats: dict[str, dict[str, int]] = {}
+    stats = {}
     for rec in records:
-        name  = f"{rec.get('–ò–º—è', '')} {rec.get('–§–∞–º–∏–ª–∏—è', '')}".strip()
-        uname = rec.get("Username", "‚Äî")
-        key   = f"{name} ({uname})"
-        t     = rec.get("–¢–∏–ø", "")
-        entry = stats.setdefault(key, {"–í–∏–¥–µ–æ": 0, "–ö—Ä—É–∂–æ—á–µ–∫": 0})
+        first = rec.get(_NAME, "")
+        last  = rec.get(_SURNAME, "")
+        name  = (first + " " + last).strip()
+        uname = rec.get("Username", _DASH)
+        key   = name + " (" + uname + ")"
+        t     = rec.get(_TYPE, "")
+        entry = stats.setdefault(key, {_VIDEO: 0, _KRUZH: 0})
         if t in entry:
             entry[t] += 1
 
-    lines = ["üìä *–°—Ç–∞—Ç–∏—Å—Ç–∏–∫–∞ –≤–∏–¥–µ–æ –∏ –∫—Ä—É–∂–æ—á–∫–æ–≤:*\n"]
+    lines = ["\U0001f4ca *\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430:*\n"]
     for person, c in sorted(stats.items(), key=lambda x: -sum(x[1].values())):
+        v = c[_VIDEO]
+        k = c[_KRUZH]
         lines.append(
-            f"üë§ {person}\n"
-            f"  üé¨ –í–∏–¥–µ–æ: {c['–í–∏–¥–µ–æ']}\n"
-            f"  ‚≠ï –ö—Ä—É–∂–æ—á–∫–æ–≤: {c['–ö—Ä—É–∂–æ—á–µ–∫']}\n"
-            f"  –ò—Ç–æ–≥–æ: {sum(c.values())}\n"
+            "\U0001f464 " + person + "\n"
+            + "  \U0001f3ac \u0412\u0438\u0434\u0435\u043e: " + str(v) + "\n"
+            + "  \u2b55 \u041a\u0440\u0443\u0436\u043e\u0447\u043a\u043e\u0432: " + str(k) + "\n"
+            + "  \u0418\u0442\u043e\u0433\u043e: " + str(v + k) + "\n"
         )
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
 
 
-async def on_mystats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """–õ–∏—á–Ω–∞—è —Å—Ç–∞—Ç–∏—Å—Ç–∏–∫–∞ –≤—ã–∑–≤–∞–≤—à–µ–≥–æ –∫–æ–º–∞–Ω–¥—É –ø–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª—è."""
+async def on_mystats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     try:
         records = _sheet().get_all_records()
     except Exception:
-        log.exception("–û—à–∏–±–∫–∞ —á—Ç–µ–Ω–∏—è —Ç–∞–±–ª–∏—Ü—ã")
-        await update.message.reply_text("‚ùå –ù–µ —É–¥–∞–ª–æ—Å—å –ø–æ–ª—É—á–∏—Ç—å –¥–∞–Ω–Ω—ã–µ.")
+        log.exception("Error reading Google Sheets")
+        await update.message.reply_text(
+            "\u274c \u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c "
+            "\u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u0434\u0430\u043d\u043d\u044b\u0435."
+        )
         return
 
-    counts = {"–í–∏–¥–µ–æ": 0, "–ö—Ä—É–∂–æ—á–µ–∫": 0}
+    counts = {_VIDEO: 0, _KRUZH: 0}
     for rec in records:
         if str(rec.get("User ID", "")) == str(user.id):
-            t = rec.get("–¢–∏–ø", "")
+            t = rec.get(_TYPE, "")
             if t in counts:
                 counts[t] += 1
 
     total = sum(counts.values())
     if total == 0:
-        await update.message.reply_text("–£ —Ç–µ–±—è –ø–æ–∫–∞ –Ω–µ—Ç –∑–∞–ø–∏—Å–µ–π.")
+        await update.message.reply_text(
+            "\u0423 \u0442\u0435\u0431\u044f \u043f\u043e\u043a\u0430 "
+            "\u043d\u0435\u0442 \u0437\u0430\u043f\u0438\u0441\u0435\u0439."
+        )
         return
 
-    name = user.first_name or "–¢—ã"
+    fname = user.first_name or "\u0422\u044b"
+    v = counts[_VIDEO]
+    k = counts[_KRUZH]
     await update.message.reply_text(
-        f"üìä *–¢–≤–æ—è —Å—Ç–∞—Ç–∏—Å—Ç–∏–∫–∞, {name}:*\n\n"
-        f"üé¨ –í–∏–¥–µ–æ: {counts['–í–∏–¥–µ–æ']}\n"
-        f"‚≠ï –ö—Ä—É–∂–æ—á–∫–æ–≤: {counts['–ö—Ä—É–∂–æ—á–µ–∫']}\n"
-        f"–ò—Ç–æ–≥–æ: {total}",
+        "\U0001f4ca *\u0422\u0432\u043e\u044f \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430, "
+        + fname + ":*\n\n"
+        + "\U0001f3ac \u0412\u0438\u0434\u0435\u043e: " + str(v) + "\n"
+        + "\u2b55 \u041a\u0440\u0443\u0436\u043e\u0447\u043a\u043e\u0432: " + str(k) + "\n"
+        + "\u0418\u0442\u043e\u0433\u043e: " + str(total),
         parse_mode="Markdown",
     )
 
 
-async def on_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def on_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "üëã –ü—Ä–∏–≤–µ—Ç! –Ø –∑–∞–ø–∏—Å—ã–≤–∞—é –≤—Å–µ –≤–∏–¥–µ–æ –∏ –∫—Ä—É–∂–æ—á–∫–∏ –∏–∑ —ç—Ç–æ–≥–æ —á–∞—Ç–∞ –≤ Google –¢–∞–±–ª–∏—Ü—É.\n\n"
-        "üìå –ö–æ–º–∞–Ω–¥—ã:\n"
-        "*/stats* ‚Äî –æ–±—â–∞—è —Å—Ç–∞—Ç–∏—Å—Ç–∏–∫–∞ –ø–æ –≤—Å–µ–º\n"
-        "*/mystats* ‚Äî –º–æ—è –ª–∏—á–Ω–∞—è —Å—Ç–∞—Ç–∏—Å—Ç–∏–∫–∞",
+        "\U0001f44b \u041f\u0440\u0438\u0432\u0435\u0442! "
+        "\u042f \u0437\u0430\u043f\u0438\u0441\u044b\u0432\u0430\u044e \u0432\u0441\u0435 \u0432\u0438\u0434\u0435\u043e "
+        "\u0438 \u043a\u0440\u0443\u0436\u043e\u0447\u043a\u0438 \u0438\u0437 \u044d\u0442\u043e\u0433\u043e \u0447\u0430\u0442\u0430 "
+        "\u0432 Google \u0422\u0430\u0431\u043b\u0438\u0446\u0443.\n\n"
+        "\U0001f4cc \u041a\u043e\u043c\u0430\u043d\u0434\u044b:\n"
+        "*/stats* \u2014 \u043e\u0431\u0449\u0430\u044f \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430\n"
+        "*/mystats* \u2014 \u043c\u043e\u044f \u043b\u0438\u0447\u043d\u0430\u044f \u0441\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043a\u0430",
         parse_mode="Markdown",
     )
 
-
-# ‚îÄ‚îÄ‚îÄ Health-check —Å–µ—Ä–≤–µ—Ä (–Ω—É–∂–µ–Ω –¥–ª—è Render.com free tier) ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 
 class _PingHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -191,27 +198,24 @@ class _PingHandler(BaseHTTPRequestHandler):
         self.wfile.write(b"ok")
 
     def log_message(self, *_):
-        pass  # –ó–∞–≥–ª—É—à–∫–∞, —á—Ç–æ–±—ã –Ω–µ —Å–ø–∞–º–∏—Ç—å –≤ –∫–æ–Ω—Å–æ–ª—å
+        pass
 
 
-def _start_health_server() -> None:
+def _start_health_server():
     HTTPServer(("0.0.0.0", PORT), _PingHandler).serve_forever()
 
 
-# ‚îÄ‚îÄ‚îÄ –¢–æ—á–∫–∞ –≤—Ö–æ–¥–∞ ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
-
-def main() -> None:
-    # –ó–∞–ø—É—Å–∫–∞–µ–º HTTP-—Å–µ—Ä–≤–µ—Ä –≤ —Ñ–æ–Ω–µ (Render.com —Ç—Ä–µ–±—É–µ—Ç –æ—Ç–∫—Ä—ã—Ç—ã–π –ø–æ—Ä—Ç)
+def main():
     threading.Thread(target=_start_health_server, daemon=True).start()
-    log.info("Health-check —Å–µ—Ä–≤–µ—Ä —Å–ª—É—à–∞–µ—Ç –ø–æ—Ä—Ç %d", PORT)
+    log.info("Health-check server on port %d", PORT)
 
     app = Application.builder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start",    on_start))
-    app.add_handler(CommandHandler("stats",    on_stats))
-    app.add_handler(CommandHandler("mystats",  on_mystats))
+    app.add_handler(CommandHandler("start",   on_start))
+    app.add_handler(CommandHandler("stats",   on_stats))
+    app.add_handler(CommandHandler("mystats", on_mystats))
     app.add_handler(MessageHandler(filters.VIDEO | filters.VIDEO_NOTE, on_video))
 
-    log.info("–ë–æ—Ç –∑–∞–ø—É—â–µ–Ω (polling)...")
+    log.info("Bot started (polling)...")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
